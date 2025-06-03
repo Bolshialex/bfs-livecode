@@ -1,3 +1,8 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class Search {
      /**
      * Finds the location of the nearest reachable cheese from the rat's position.
@@ -29,6 +34,61 @@ public class Search {
      * @throws HungryRatException if there is no reachable cheese
      */
     public static int[] nearestCheese(char[][] maze) throws EscapedRatException, CrowdedMazeException, HungryRatException {
-        return null;
+        boolean[][] visited = new boolean[maze.length][maze[0].length];
+        int[] start = ratLocation(maze);
+        Queue<int[]> queue = new LinkedList<>();
+
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            if(visited[cur[0]][cur[1]]) continue;
+
+            visited[cur[0]][cur[1]] = true;
+
+            if(maze[cur[0]][cur[1]] == 'c') return new int[]{cur[0],cur[1]};
+
+            queue.addAll(getNeighbors(maze, cur));
+        }
+
+        throw new HungryRatException();
+    }
+
+    public static int[] ratLocation(char[][] maze) throws EscapedRatException, CrowdedMazeException{
+        int[] location = null;
+
+        for(int r = 0; r < maze.length; r++){
+            for(int c = 0; c < maze[r].length; c++){
+                if(maze[r][c] == 'R'){
+                    if(location != null) throw new CrowdedMazeException();
+                    location = new int[]{r,c};
+                }
+            }
+        }
+        if(location == null) throw new EscapedRatException();
+        return location;
+    }
+
+    public static List<int[]> getNeighbors(char[][] maze, int[] curLocation){
+        List<int[]> neighbors = new ArrayList<>();
+        int curR = curLocation[0];
+        int curC = curLocation[1];
+        int[][] directions = {
+            {-1, 0},
+            {1, 0},
+            {0, -1},
+            {0, 1},
+        };
+        for (int[] direction : directions) {
+            int changeR = direction[0];
+            int changeC = direction[1];
+
+            int newR = curR + changeR;
+            int newC = curC + changeC;
+            if(newR >= 0 && newR < maze.length && newC >= 0 && newC < maze[newR].length && maze[newR][newC] != 'w'){
+                neighbors.add(new int[]{newR, newC});
+            }
+        }
+
+        return neighbors;
     }
 }
